@@ -12,28 +12,17 @@ function Keyboard({ guesses, onAddLetter, disabled }) {
     []
   );
 
-  const getStatus = (letter) => {
-    //if letter was ever correct, it is correct
-    // if letter was ever misplaced, it is misplaced
-    // if used ever, incorrect
-    // not used
-
-    const matches = allGuessStatuses.filter((g) => g.letter === letter);
-
-    if (matches.length === 0) {
-      return "";
+  const guessStatusMap = allGuessStatuses.reduce((prev, curr) => {
+    if (curr.status === "correct") {
+      prev[curr.letter] = "correct";
+    } else if (curr.status === "misplaced" && prev[curr.letter] !== "correct") {
+      prev[curr.letter] = "misplaced";
+    } else if (prev[curr.letter] === undefined) {
+      prev[curr.letter] = "incorrect";
     }
 
-    if (matches.find((g) => g.status === "correct")) {
-      return "correct";
-    }
-
-    if (matches.find((g) => g.status === "misplaced")) {
-      return "misplaced";
-    }
-
-    return "incorrect";
-  };
+    return prev;
+  }, {});
 
   return (
     <div className="keyboard-wrapper">
@@ -41,7 +30,7 @@ function Keyboard({ guesses, onAddLetter, disabled }) {
         <div className="keyboard-row" key={row[0]}>
           {row.map((letter) => (
             <button
-              className={`keyboard-letter ${getStatus(letter)}`}
+              className={`keyboard-letter ${guessStatusMap[letter] || ""}`}
               key={`row-${row[0]}-${letter}}`}
               onClick={() => onAddLetter(letter)}
               disabled={disabled}
